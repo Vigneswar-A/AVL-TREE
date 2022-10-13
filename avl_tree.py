@@ -70,7 +70,7 @@ class Tree:
         return helper(self.root)
 
     def delete(self, val):
-        def helper(node, val=val):
+        def helper(node, val):
             if not node:
                 return None
             if node.val == val:
@@ -79,15 +79,15 @@ class Tree:
                     while temp.left:
                         temp = temp.left
                     node.val = temp.val
-                    node.right = helper(node.right, node.val)
+                    node.right = helper(node.right, temp.val)
                     return node
 
                 return node.left or node.right
 
             if val < node.val:
-                node.left = helper(node.left)
+                node.left = helper(node.left, val)
             else:
-                node.right = helper(node.right)
+                node.right = helper(node.right, val)
 
             balance = Tree.get_balance(node)
 
@@ -110,7 +110,7 @@ class Tree:
 
             return node
 
-        self.root = helper(self.root)
+        self.root = helper(self.root, val)
 
     def get_balance(node):
         return Tree.get_height(node.left) - Tree.get_height(node.right)
@@ -180,5 +180,6 @@ tree.insert(5)
 tree.insert(9)
 tree.insert(10)
 
-root = tree.root
+print(tree)
+tree.delete(5)
 print(tree)
