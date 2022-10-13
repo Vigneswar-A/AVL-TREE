@@ -1,7 +1,3 @@
-
-from collections import deque
-
-
 class Node:
     def __init__(self, val=0, left=None, right=None):
         self.val = val
@@ -16,6 +12,31 @@ class Node:
 class Tree:
     def __init__(self):
         self.root = None
+
+    def __str__(self):
+        if self.root is None:
+            return None
+        tree = []
+        prev = [self.root]
+        n = 0
+        while any(node != None for node in prev):
+            n += 1
+            temp = [None]*(2**n)
+            for i in range(n):
+                if prev[i] is None:
+                    temp[2*i] = None
+                    temp[2*i+1] = None
+                else:
+                    temp[2*i] = prev[i].left
+                    temp[2*i+1] = prev[i].right
+            tree.append(prev)
+            prev = temp
+
+        width = 2**(self.root.height) - 1
+        tree_string = ""
+        for level in tree:
+            tree_string += f'{" ".join(str(node.val) if node else "#" for node in level): ^{width}}\n'
+        return tree_string
 
     def get_height(node):
         if node is None:
@@ -115,21 +136,6 @@ class Tree:
     def get_balance(node):
         return Tree.get_height(node.left) - Tree.get_height(node.right)
 
-    def rotate_right(node):
-        other = node.left
-        temp = other.right
-
-        other.right = node
-        node.left = temp
-
-        node.height = max(Tree.get_height(node.left),
-                          Tree.get_height(node.right)) + 1
-
-        other.height = max(Tree.get_height(other.left),
-                           Tree.get_height(other.right)) + 1
-
-        return other
-
     def rotate_left(node):
         other = node.right
         temp = other.left
@@ -145,32 +151,65 @@ class Tree:
 
         return other
 
-    def level_order(self):
-        if self.root is None:
-            return None
+    def rotate_right(node):
+        other = node.left
+        temp = other.right
+
+        other.right = node
+        node.left = temp
+
+        node.height = max(Tree.get_height(node.left),
+                          Tree.get_height(node.right)) + 1
+
+        other.height = max(Tree.get_height(other.left),
+                           Tree.get_height(other.right)) + 1
+
+        return other
+
+    def preorder(self):
         res = []
-        prev = [self.root]
-        n = 0
-        while any(node != None for node in prev):
-            n += 1
-            temp = [None]*(2**n)
-            for i in range(n):
-                if prev[i] is None:
-                    temp[2*i] = None
-                    temp[2*i+1] = None
-                else:
-                    temp[2*i] = prev[i].left
-                    temp[2*i+1] = prev[i].right
-            res.append(prev)
-            prev = temp
+
+        def helper(root):
+            if not root:
+                return False
+            res.append(root)
+            helper(root.left)
+            helper(root.right)
         return res
 
-    def __str__(self):
-        width = 2**(self.root.height) - 1
-        tree_string = ""
-        for level in self.level_order():
-            tree_string += f'{" ".join(str(node.val) if node else "#" for node in level): ^{width}}\n'
-        return tree_string
+    def inorder(self):
+        res = []
+
+        def helper(root):
+            if not root:
+                return False
+            helper(root.left)
+            res.append(root)
+            helper(root.right)
+        return res
+
+    def postorder(self):
+        res = []
+
+        def helper(root):
+            if not root:
+                return False
+            helper(root.left)
+            helper(root.right)
+            res.append(root)
+        return res
+
+    def level_order(self):
+        from collections import deque
+        res = []
+        queue = deque([self.root])
+        while queue:
+            node = queue.popleft()
+            res.append(node)
+            if not node:
+                continue
+            queue.extendleft([node.left, node.right])
+        return res
 
 
 tree = Tree()
